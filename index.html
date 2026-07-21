@@ -32,7 +32,6 @@
             background: #64748b;
         }
 
-        /* */
         /* 重點美化：AI 回傳 Markdown 表格與卡片排版 */
         #smartResultCard {
             font-size: 0.925rem;
@@ -44,10 +43,10 @@
         #smartResultCard strong {
             color: #f87171; /* 醒目紅色高亮 */
         }
-        /* 外層防擠壓滾動容器 */
+
+        /* 寬版響應式表格排版 */
         #smartResultCard table {
             width: 100%;
-            min-width: 850px; /* 強制最小寬度，防止欄位硬擠 */
             border-collapse: separate;
             border-spacing: 0;
             margin-top: 1.25rem;
@@ -62,18 +61,18 @@
             color: #f1f5f9;
             font-weight: 700;
             text-align: left;
-            padding: 12px 14px;
+            padding: 12px 16px;
             border-bottom: 2px solid #475569;
             white-space: nowrap; /* 標題不折行 */
-            font-size: 0.8rem;
+            font-size: 0.825rem;
             letter-spacing: 0.05em;
             text-transform: uppercase;
         }
         #smartResultCard td {
-            padding: 12px 14px;
+            padding: 12px 16px;
             border-bottom: 1px solid #1e293b;
             color: #cbd5e1;
-            font-size: 0.85rem;
+            font-size: 0.875rem;
             vertical-align: middle;
         }
         #smartResultCard tr:last-child td {
@@ -105,13 +104,13 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            padding: 3px 10px;
+            padding: 4px 12px;
             background: rgba(220, 38, 38, 0.15);
             border: 1px solid rgba(239, 68, 68, 0.4);
             border-radius: 6px;
             white-space: nowrap;
             transition: all 0.2s ease-in-out;
-            font-size: 0.78rem;
+            font-size: 0.8rem;
         }
         #smartResultCard a:hover {
             background: rgba(220, 38, 38, 0.35);
@@ -132,7 +131,7 @@
 <body class="text-slate-100 min-h-screen flex flex-col justify-between">
 
     <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
-        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">
                 <div class="bg-red-600 text-white p-2.5 rounded-lg flex items-center justify-center shadow-md shadow-red-950/50">
                     <i class="fa-solid fa-microchip text-xl"></i>
@@ -163,7 +162,7 @@
         </div>
     </header>
 
-    <main class="max-w-5xl mx-auto px-6 py-8 flex-grow w-full">
+    <main class="max-w-[1600px] mx-auto px-4 sm:px-8 py-8 flex-grow w-full">
         
         <!-- CORS 中繼站設定開關與說明 -->
         <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3 mb-6 flex items-center justify-between gap-4 text-xs">
@@ -221,7 +220,7 @@
                 <div class="flex flex-col sm:flex-row gap-3">
                     <input type="text" id="exactQueryInput" 
                            class="flex-grow px-4 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-lg text-slate-100 focus:outline-none focus:border-red-500 transition-all placeholder-slate-500 uppercase"
-                           placeholder="例如：ELD05R100U0100W03 或 EPD05R100U0100W05">
+                           placeholder="例如：3323808 或 ELD05R100U0100W03 或 EPD05R100U0100W05">
                     <button id="exactSearchBtn" class="bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
                         <i class="fa-solid fa-search"></i> 精準查詢
                     </button>
@@ -229,6 +228,7 @@
                 <!-- 快速測試型號 -->
                 <div class="mt-4 flex flex-wrap items-center gap-2">
                     <span class="text-xs text-slate-500 mr-2 font-medium">熱門型號：</span>
+                    <button class="quick-model-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">3323808</button>
                     <button class="quick-model-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">ELD05R100U0100W03</button>
                     <button class="quick-model-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">EPD05R100U0100W05</button>
                 </div>
@@ -275,22 +275,8 @@
                 </div>
                 
                 <div class="p-6 space-y-4">
-                    <!-- Markdown 內容或轉譯表單顯示卡片 (帶橫向滾動) -->
+                    <!-- 全版寬高質感表格顯示卡片 -->
                     <div id="smartResultCard" class="prose prose-invert max-w-none text-slate-300 leading-relaxed bg-slate-950/60 p-5 rounded-xl border border-slate-800 overflow-x-auto">
-                    </div>
-
-                    <!-- 精準型號屬性表 -->
-                    <div id="exactResultTable" class="hidden overflow-x-auto rounded-xl border border-slate-800">
-                        <table class="w-full text-sm text-left text-slate-300">
-                            <thead class="text-xs uppercase bg-slate-950 text-slate-400">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3">規格欄位 (Feature)</th>
-                                    <th scope="col" class="px-6 py-3">核心參數值 (Value)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
@@ -348,8 +334,6 @@
 
         const resultContainer = document.getElementById('resultContainer');
         const smartResultCard = document.getElementById('smartResultCard');
-        const exactResultTable = document.getElementById('exactResultTable');
-        const tableBody = document.getElementById('tableBody');
         const resultTime = document.getElementById('resultTime');
         const resultWorkflow = document.getElementById('resultWorkflow');
         const loadMockBtn = document.getElementById('loadMockBtn');
@@ -376,6 +360,16 @@
 
         function updateLoaderMessage(msg) {
             loaderMessage.textContent = msg;
+        }
+
+        // 強制確保所有連結一律另開視窗 (target="_blank")
+        function enforceNewTabLinks(container) {
+            if (!container) return;
+            const links = container.querySelectorAll('a');
+            links.forEach(link => {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+            });
         }
 
         // 核心 API 呼叫 (90 秒長連線與多重代理備援)
@@ -413,7 +407,6 @@
                 try {
                     updateLoaderMessage(`正在透過 [${proxy.name}] 連線 Tungaloy 資料庫...`);
                     
-                    // 關鍵修正：將逾時時間延長至 90 秒 (90000 ms)
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 90000);
 
@@ -525,7 +518,7 @@
             resultWorkflow.classList.remove('hidden');
 
             smartResultCard.innerHTML = marked.parse(mockText);
-            exactResultTable.classList.add('hidden');
+            enforceNewTabLinks(smartResultCard);
             resultContainer.classList.remove('hidden');
             errorAlert.classList.add('hidden');
         });
@@ -575,8 +568,8 @@
                 resultWorkflow.classList.remove('hidden');
 
                 smartResultCard.innerHTML = marked.parse(data.result || "無回傳結果");
+                enforceNewTabLinks(smartResultCard);
                 
-                exactResultTable.classList.add('hidden');
                 resultContainer.classList.remove('hidden');
 
             } catch (err) {
@@ -592,7 +585,7 @@
             }
         }
 
-        // 精準型號查詢
+        // 精準型號查詢（重點解析：解開 JSON items 陣列，轉為與 AI 搜尋一致的高質感表單）
         async function triggerExactSearch() {
             const cleanKey = sanitizeApiKey(apiKeyInput.value);
             apiKeyInput.value = cleanKey;
@@ -630,30 +623,95 @@
                 resultTime.textContent = `查詢時間: ${new Date().toLocaleTimeString()}`;
                 resultWorkflow.classList.add('hidden');
 
-                let overviewMd = `### 📦 產品型號：\`${itemNumber}\` \n已從 Tungaloy 雲端同步最新規格屬性數據：`;
-                smartResultCard.innerHTML = marked.parse(overviewMd);
-
-                tableBody.innerHTML = '';
-                const properties = Object.entries(data);
-                if (properties.length > 0) {
-                    properties.forEach(([key, value]) => {
-                        const tr = document.createElement('tr');
-                        tr.className = "bg-slate-900 border-b border-slate-800 hover:bg-slate-800/50 transition-colors";
-                        let displayValue = typeof value === 'object' ? JSON.stringify(value) : value;
-
-                        tr.innerHTML = `
-                            <td class="px-6 py-4 font-semibold text-slate-300 select-all">${key}</td>
-                            <td class="px-6 py-4 text-emerald-400 font-mono select-all">${displayValue}</td>
-                        `;
-                        tableBody.appendChild(tr);
-                    });
-                    exactResultTable.classList.remove('hidden');
-                } else {
-                    tableBody.innerHTML = `<tr><td colspan="2" class="px-6 py-4 text-center text-slate-500">無額外規格數據。</td></tr>`;
-                    exactResultTable.classList.remove('hidden');
+                // 提取核心物件與字典欄位
+                let itemData = null;
+                if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+                    itemData = data.items[0];
+                } else if (typeof data === 'object' && !data.items) {
+                    itemData = data;
                 }
 
-                resultContainer.classList.remove('hidden');
+                const colDefs = data.columnDefinitions || {};
+
+                if (itemData) {
+                    // 抓取 Catalog 連結
+                    let catalogUrl = itemData.itemSpec?.E-catalog_url || 
+                                     itemData["E-catalog_url"] || 
+                                     (itemData.itemSpec && itemData.itemSpec["E-catalog_url"]) || 
+                                     `http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=${encodeURIComponent(itemNumber)}&search=P&choose=c`;
+
+                    let desc = itemData.DESCRIPTION || itemData.product_name || itemNumber;
+                    let series = itemData.series || itemData.product_name || 'Tungaloy Series';
+                    let app = [itemData.MainApplication, itemData.SubApplication].filter(Boolean).join(' / ') || 'General Machining';
+
+                    let htmlContent = `
+                        <!-- 頂部產品卡片 -->
+                        <div class="bg-gradient-to-r from-red-950/80 via-slate-900 to-slate-900 border border-red-800/60 rounded-xl p-5 mb-6 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="bg-red-600/30 text-red-400 text-xs font-bold px-2.5 py-0.5 rounded border border-red-500/30">精準型號數據</span>
+                                    <h3 class="text-xl font-bold text-slate-100 font-mono">${itemNumber}</h3>
+                                </div>
+                                <p class="text-sm text-slate-300 font-medium">${desc}</p>
+                                <div class="flex flex-wrap gap-4 text-xs text-slate-400 mt-2">
+                                    <span><i class="fa-solid fa-layer-group text-amber-500 mr-1"></i>系列：<strong class="text-slate-200">${series}</strong></span>
+                                    <span><i class="fa-solid fa-gears text-amber-500 mr-1"></i>應用：<strong class="text-slate-200">${app}</strong></span>
+                                </div>
+                            </div>
+                            <a href="${catalogUrl}" target="_blank" rel="noopener noreferrer" 
+                               class="bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-bold px-5 py-3 rounded-xl text-xs flex items-center gap-2 shadow-lg hover:shadow-red-900/40 transition-all whitespace-nowrap">
+                               <i class="fa-solid fa-external-link-alt"></i> 前往 Tungaloy 官方 E-catalog (CAD/3D)
+                            </a>
+                        </div>
+                    `;
+
+                    // 剔除內部無效鍵名
+                    const filterKeys = ['source_file', 'source_row', 'columnDefinitions', 'responseDefinitions', 'query', 'warnings', 'hasMore', 'nextOffset', 'searchMode', 'resultCount', 'returnedCount', 'nextSuggestedFilters', 'items', 'itemSpec'];
+
+                    let tableRows = '';
+                    Object.entries(itemData).forEach(([key, val]) => {
+                        if (filterKeys.includes(key)) return;
+                        if (val === null || val === undefined || val === '') return;
+
+                        let label = colDefs[key] || key;
+                        let displayVal = typeof val === 'object' ? JSON.stringify(val) : val;
+
+                        if (typeof displayVal === 'string' && (displayVal.startsWith('http://') || displayVal.startsWith('https://'))) {
+                            displayVal = `<a href="${displayVal}" target="_blank" rel="noopener noreferrer" class="text-red-400 hover:underline inline-flex items-center gap-1"><i class="fa-solid fa-link"></i> 開啟連結 🔗</a>`;
+                        }
+
+                        tableRows += `
+                            <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition-colors">
+                                <td class="px-5 py-3 font-semibold text-slate-300 text-xs sm:text-sm w-1/2">${label} <span class="text-slate-500 text-xs font-mono ml-1">(${key})</span></td>
+                                <td class="px-5 py-3 text-emerald-400 font-mono text-xs sm:text-sm select-all">${displayVal}</td>
+                            </tr>
+                        `;
+                    });
+
+                    htmlContent += `
+                        <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/80">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-slate-950 text-slate-400 text-xs uppercase border-b border-slate-800">
+                                    <tr>
+                                        <th class="px-5 py-3">規格欄位 (Feature)</th>
+                                        <th class="px-5 py-3">核心參數值 (Value)</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800">
+                                    ${tableRows || '<tr><td colspan="2" class="px-5 py-4 text-center text-slate-500">無額外規格數據。</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    smartResultCard.innerHTML = htmlContent;
+                    enforceNewTabLinks(smartResultCard);
+                    resultContainer.classList.remove('hidden');
+
+                } else {
+                    smartResultCard.innerHTML = `<p class="text-slate-400">未找到該型號 (${itemNumber}) 的詳細屬性數據。</p>`;
+                    resultContainer.classList.remove('hidden');
+                }
 
             } catch (err) {
                 errorText.textContent = err.message;
@@ -677,3 +735,4 @@
     </script>
 </body>
 </html>
+```
