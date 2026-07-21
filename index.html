@@ -381,8 +381,8 @@
       });
     }
 
-    // 發送請求核心 (包含代理備援與 90 秒逾時)
-    async function fetchApiWithTimeout(endpoint, bodyData) {
+    // 發送請求核心 (支援 GET/POST 判斷與多重備援)
+    async function fetchApiWithTimeout(endpoint, method = 'POST', bodyData = null) {
       const token = apiKeyInput.value.trim();
       if (!token) {
         throw new Error('請先在頂部輸入並儲存您的 API Bearer Token！');
@@ -404,15 +404,21 @@
         const timeoutId = setTimeout(() => controller.abort(), 90000);
 
         try {
-          const res = await fetch(url, {
-            method: 'POST',
+          const fetchOptions = {
+            method: method,
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(bodyData),
             signal: controller.signal
-          });
+          };
+
+          // 只有非 GET 請求才能帶入 body
+          if (bodyData && method !== 'GET') {
+            fetchOptions.body = JSON.stringify(bodyData);
+          }
+
+          const res = await fetch(url, fetchOptions);
 
           clearTimeout(timeoutId);
 
@@ -448,10 +454,50 @@
       startTimer();
 
       try {
-        const data = await fetchApiWithTimeout('/v1/catalog/smart-search', {
+        // AI 搜尋使用 POST 方法
+        const data = await fetchApiWithTimeout('/v1/catalog/smart-search', 'POST', {
           query: q,
           language: 'zh-TW'
         });
+
+        stopTimer();
+        statusBox.classList.add('hidden');
+        resultBox.classList.remove('hidden');
+
+        metaInfo.innerText = `查詢時間: ${new Date().toLocaleTimeString()}  |  Workflow ID: ${data.workflow_run_id || 'N/A'}`;
+
+        const rawText = data.result || (data.outputs ? data.outputs.text : '') || '無可顯示的搜尋結果';
+        
+        let htmlContent = marked.parse(rawText);
+        htmlContent = htmlContent.replace(/<table>/g, '<div class="prose-table-container"><table>').replace(/<\/table>/g, '</table></div>');
+        
+        contentRender.innerHTML = htmlContent;
+        enforceNewTabLinks();
+
+      } catch (err) {
+        stopTimer();
+        spinner.classList.add('hidden');
+        statusText.innerText = '查詢發生錯誤：' + err.message;
+        statusText.className = 'text-red-400 font-bold';
+      }
+    }
+
+    // 2. 精準型號查詢
+    exactSearchBtn.addEventListener('click', triggerExactSearch);
+
+    async function triggerExactSearch() {
+      const itemNo = exactQueryInput.value.trim();
+      if (!itemNo) return alert('請輸入刀具型號！');
+
+      statusBox.classList.remove('hidden');
+      resultBox.classList.add('hidden');
+      statusText.innerText = '正在抓取型號精準規格...';
+      spinner.classList.remove('hidden');
+      startTimer();
+
+      try {
+        // ★ 修正：精準查詢改用 GET 方法，並把型號接在網址後面
+        const data = await fetchApiWithTimeout(`/v1/catalog/items/${encodeURIComponent(itemNo)}`, 'GET');
 
         stopTimer();
         statusBox.classList.add('hidden');
