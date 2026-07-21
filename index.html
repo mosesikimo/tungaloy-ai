@@ -281,6 +281,28 @@
                 </div>
             </div>
         </div>
+
+        <div class="mt-12 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 text-xs text-slate-400 leading-relaxed space-y-3">
+            <div class="flex items-center gap-2 text-slate-300 font-bold border-b border-slate-800 pb-2">
+                <i class="fa-solid fa-circle-info text-sky-400"></i>
+                <span>API 數據來源與系統免責聲明 (Disclaimer)</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                <div>
+                    <p class="font-semibold text-slate-300 mb-1">🔗 原始數據與 API 連線來源：</p>
+                    <p>本系統之刀具產品規格、CAD 連結及 AI 智能檢索數據，均直接連線自 <strong class="text-slate-200">Tungaloy Corporation（泰珂洛）官方 eCatalog Open API</strong>：</p>
+                    <p class="font-mono text-slate-400 bg-slate-950 px-2 py-1 rounded mt-1 inline-block border border-slate-800">https://e-catalog-search-main-ae100fb.d2.zuplo.dev</p>
+                </div>
+                <div>
+                    <p class="font-semibold text-slate-300 mb-1">⚖️ 使用免責聲明：</p>
+                    <ul class="list-disc list-inside space-y-1 text-slate-400">
+                        <li>本工具為前端連線介面，所有刀具型號、圖片、技術規格及品牌商標著作權均歸屬 <strong class="text-slate-300">Tungaloy Corporation</strong> 所有。</li>
+                        <li>查詢結果由官方 API 即時回傳，僅供工程查詢參考。實際加工或下單前，請務必點擊連結確認官方 E-Catalog 最新規範。</li>
+                        <li>金鑰（API Key）僅儲存於您個人的瀏覽器 LocalStorage，本網頁不設立任何中間伺服器收集或儲存您的私密金鑰。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </main>
 
     <footer class="border-t border-slate-800 bg-slate-950/50 py-6 text-center text-xs text-slate-500">
@@ -585,7 +607,7 @@
             }
         }
 
-        // 精準型號查詢（重點解析：解開 JSON items 陣列，轉為與 AI 搜尋一致的高質感表單）
+        // 精準型號查詢（重點修正：修復 catalog_url 未定義之 ReferenceError，安全解析表格）
         async function triggerExactSearch() {
             const cleanKey = sanitizeApiKey(apiKeyInput.value);
             apiKeyInput.value = cleanKey;
@@ -634,10 +656,12 @@
                 const colDefs = data.columnDefinitions || {};
 
                 if (itemData) {
-                    // 抓取 Catalog 連結
-                    let catalogUrl = itemData.itemSpec?.E-catalog_url || 
+                    // 安全抓取 Catalog 連結（修正先前造成變數未定義之錯誤）
+                    let catalogUrl = itemData.catalog_url || 
+                                     itemData.E_catalog_url || 
                                      itemData["E-catalog_url"] || 
-                                     (itemData.itemSpec && itemData.itemSpec["E-catalog_url"]) || 
+                                     itemData.itemSpec?.["E-catalog_url"] || 
+                                     itemData.itemSpec?.E_catalog_url || 
                                      `http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=${encodeURIComponent(itemNumber)}&search=P&choose=c`;
 
                     let desc = itemData.DESCRIPTION || itemData.product_name || itemNumber;
@@ -665,7 +689,7 @@
                         </div>
                     `;
 
-                    // 剔除內部無效鍵名
+                    // 剔除內部無效與除錯鍵名
                     const filterKeys = ['source_file', 'source_row', 'columnDefinitions', 'responseDefinitions', 'query', 'warnings', 'hasMore', 'nextOffset', 'searchMode', 'resultCount', 'returnedCount', 'nextSuggestedFilters', 'items', 'itemSpec'];
 
                     let tableRows = '';
@@ -735,4 +759,3 @@
     </script>
 </body>
 </html>
-```
