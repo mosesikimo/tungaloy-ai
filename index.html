@@ -1,761 +1,609 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tungaloy 泰珂洛 AI 智慧搜尋工具</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome 圖示 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Marked.js 負責將 AI 回傳的 Markdown 語法轉為格式化內容 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #0f172a; /* 深色高質感背景 */
-        }
-        /* 美化滾動條 */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1e293b;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tungaloy AI eCatalog 智慧搜尋系統 (zh-TW 繁中版)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-        /* 重點美化：AI 回傳 Markdown 表格與卡片排版 */
-        #smartResultCard {
-            font-size: 0.925rem;
-            line-height: 1.7;
-        }
-        #smartResultCard p {
-            margin-bottom: 1rem;
-        }
-        #smartResultCard strong {
-            color: #f87171; /* 醒目紅色高亮 */
-        }
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+    
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background-color: #0b0f19;
+      color: #e2e8f0;
+    }
+    .code-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    /* 專業 Markdown 表格樣式 */
+    .prose-table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 0.5rem;
+      border: 1px solid #1e293b;
+      background-color: #0f172a;
+    }
 
-        /* 寬版響應式表格排版 */
-        #smartResultCard table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 1.25rem;
-            margin-bottom: 1.25rem;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            border: 1px solid #334155;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-        }
-        #smartResultCard th {
-            background-color: #1e293b;
-            color: #f1f5f9;
-            font-weight: 700;
-            text-align: left;
-            padding: 12px 16px;
-            border-bottom: 2px solid #475569;
-            white-space: nowrap; /* 標題不折行 */
-            font-size: 0.825rem;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-        #smartResultCard td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #1e293b;
-            color: #cbd5e1;
-            font-size: 0.875rem;
-            vertical-align: middle;
-        }
-        #smartResultCard tr:last-child td {
-            border-bottom: none;
-        }
-        /* 隔行抽色與懸停高亮 */
-        #smartResultCard tr:nth-child(even) {
-            background-color: rgba(30, 41, 59, 0.35);
-        }
-        #smartResultCard tr:nth-child(odd) {
-            background-color: rgba(15, 23, 42, 0.5);
-        }
-        #smartResultCard tr:hover td {
-            background-color: rgba(51, 65, 85, 0.5);
-            color: #f8fafc;
-        }
-        /* 型號與數字欄位自動套用 Monospace */
-        #smartResultCard td:nth-child(1),
-        #smartResultCard td:nth-child(2),
-        #smartResultCard td:nth-child(6) {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 500;
-        }
-        /* 表格內 E-catalog 超連結美化為按鈕 */
-        #smartResultCard a {
-            color: #ef4444;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 12px;
-            background: rgba(220, 38, 38, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            border-radius: 6px;
-            white-space: nowrap;
-            transition: all 0.2s ease-in-out;
-            font-size: 0.8rem;
-        }
-        #smartResultCard a:hover {
-            background: rgba(220, 38, 38, 0.35);
-            color: #fca5a5;
-            border-color: #ef4444;
-            transform: translateY(-1px);
-        }
-        #smartResultCard code {
-            background-color: #1e293b;
-            color: #38bdf8;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85em;
-        }
-    </style>
+    .prose table {
+      width: 100%;
+      min-width: 1000px;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+
+    .prose th {
+      background-color: #1e293b;
+      color: #94a3b8;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .prose td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #1e293b;
+      color: #cbd5e1;
+      vertical-align: middle;
+    }
+
+    .prose tr:nth-child(even) {
+      background-color: #111827;
+    }
+
+    .prose tr:hover {
+      background-color: #1e293b;
+    }
+
+    /* 連結按鈕美化 */
+    .prose a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.625rem;
+      background-color: #dc2626;
+      color: #ffffff !important;
+      font-weight: 600;
+      font-size: 0.75rem;
+      border-radius: 9999px;
+      text-decoration: none !important;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+    }
+
+    .prose a:hover {
+      background-color: #ef4444;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+    }
+
+    .prose p {
+      margin-bottom: 0.75rem;
+      line-height: 1.6;
+    }
+
+    .prose strong {
+      color: #f8fafc;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
 </head>
-<body class="text-slate-100 min-h-screen flex flex-col justify-between">
+<body class="min-h-screen p-4 md:p-8">
 
-    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
-        <div class="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-red-600 text-white p-2.5 rounded-lg flex items-center justify-center shadow-md shadow-red-950/50">
-                    <i class="fa-solid fa-microchip text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-wider">Tungaloy <span class="text-red-500">AI</span> eCatalog</h1>
-                    <p class="text-xs text-slate-400">泰珂洛刀具 智慧語意檢索系統 (zh-TW 繁中版)</p>
-                </div>
-            </div>
-            
-            <!-- API Key 輸入與記憶區域 -->
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <div class="relative w-full sm:w-64">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500 pointer-events-none">
-                        <i class="fa-solid fa-key"></i>
-                    </span>
-                    <input type="password" id="apiKeyInput" 
-                           class="w-full pl-9 pr-8 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-red-500 transition-colors" 
-                           placeholder="在此輸入 API Key (例: AAABBB)">
-                    <button id="togglePassword" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300">
-                        <i class="fa-solid fa-eye" id="eyeIcon"></i>
-                    </button>
-                </div>
-                <button id="saveKeyBtn" class="bg-red-600 hover:bg-red-700 active:scale-95 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-lg shadow-red-900/20 whitespace-nowrap">
-                    儲存金鑰
-                </button>
-            </div>
+  <div class="max-w-[1600px] mx-auto space-y-6">
+    
+    <!-- 頂部 Header -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-red-600 to-orange-500 flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-red-900/30">
+          T
         </div>
+        <div>
+          <h1 class="text-2xl font-bold text-white tracking-wide">Tungaloy <span class="text-red-500">AI</span> eCatalog</h1>
+          <p class="text-xs text-slate-400">泰珂洛刀具 智慧語言檢索系統 (zh-TW 繁中版)</p>
+        </div>
+      </div>
+
+      <!-- 金鑰輸入欄位 -->
+      <div class="flex items-center gap-2 bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+        <div class="relative flex-1 md:w-80">
+          <input type="password" id="apiKeyInput" placeholder="請輸入 API Bearer Token..." class="w-full bg-slate-950 text-slate-200 text-sm px-3 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-red-500 transition code-font">
+          <button id="toggleApiKey" class="absolute right-2 top-2.5 text-xs text-slate-500 hover:text-slate-300">👁️</button>
+        </div>
+        <button id="saveKeyBtn" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold rounded-lg transition shadow-md">
+          儲存金鑰
+        </button>
+      </div>
     </header>
 
-    <main class="max-w-[1600px] mx-auto px-4 sm:px-8 py-8 flex-grow w-full">
+    <!-- CORS 模式提示列 -->
+    <div class="flex items-center justify-between text-xs bg-slate-900/50 border border-slate-800/80 px-4 py-2.5 rounded-lg text-slate-400">
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>瀏覽器跨網域相容模式 (CORS Proxy + 90s 長連線)：</span>
+      </div>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="corsToggle" class="sr-only peer" checked>
+        <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
+        <span class="ml-2 text-xs font-medium text-slate-300">已開啟 (備援特快)</span>
+      </label>
+    </div>
+
+    <!-- 主頁籤（AI 智能搜尋 vs 精準型號查詢） -->
+    <div class="bg-slate-900/90 rounded-2xl border border-slate-800 p-6 shadow-2xl backdrop-blur-sm">
+      <div class="flex border-b border-slate-800 gap-8 mb-6">
+        <button id="tabSmart" class="pb-3 text-sm font-bold text-red-500 border-b-2 border-red-500 flex items-center gap-2 transition">
+          <span>🚀 AI 智能搜尋 (Smart Search)</span>
+        </button>
+        <button id="tabExact" class="pb-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 flex items-center gap-2 transition">
+          <span>║║║ 精準型號查詢 (Item Lookup)</span>
+        </button>
+      </div>
+
+      <!-- 面板 1：AI 智能搜尋 -->
+      <div id="panelSmart" class="space-y-4">
+        <div class="text-xs text-slate-400 flex items-center gap-1.5">
+          <span>ℹ️ 請用「台灣繁體中文」向 AI 尋找刀具規格、加工方法或詢問推薦。</span>
+        </div>
+
+        <div class="relative">
+          <textarea id="smartQueryInput" rows="3" placeholder="例如：幫我推薦適合加工不鏽鋼的 10mm 鑽頭..." class="w-full bg-slate-950/90 border border-slate-800 rounded-xl p-4 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-red-500 transition resize-none text-sm leading-relaxed"></textarea>
+          <button id="smartSearchBtn" class="absolute right-3 bottom-3.5 px-5 py-2.5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white text-sm font-bold rounded-lg transition flex items-center gap-2 shadow-lg shadow-red-900/30">
+            <span>🚀 傳送搜尋</span>
+          </button>
+        </div>
+
+        <!-- 快速測試按鈕與測試數據 -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="text-slate-500">快速測試：</span>
+            <button class="quick-btn px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition">Find 1 mm end mills</button>
+            <button class="quick-btn px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition">直徑 10mm 的 DrillMeister 鑽頭</button>
+            <button class="quick-btn px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition">加工不鏽鋼 (SUS304) 推薦刀具</button>
+          </div>
+
+          <button id="loadMockBtn" class="px-3 py-1 bg-amber-900/30 hover:bg-amber-800/50 text-amber-300 border border-amber-700/50 rounded text-xs transition flex items-center gap-1.5">
+            <span>🧪 載入測試範例數據 (免連線)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 面板 2：精準型號查詢 -->
+      <div id="panelExact" class="space-y-4 hidden">
+        <div class="text-xs text-slate-400 flex items-center gap-1.5">
+          <span>ℹ️ 輸入正確完整的 Tungaloy 刀具或配件型號，獲取核心規格細節。</span>
+        </div>
+
+        <div class="flex gap-3">
+          <input type="text" id="exactQueryInput" placeholder="例如：3323808 或 ELD05R100U0100W03" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-red-500 transition text-sm code-font">
+          <button id="exactSearchBtn" class="px-6 py-3 bg-red-600 hover:bg-red-500 text-white text-sm font-bold rounded-xl transition flex items-center gap-2 shadow-lg shadow-red-900/30">
+            <span>🔍 精準查詢</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs text-slate-500 pt-1">
+          <span>熱門型號：</span>
+          <button class="exact-btn px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded code-font">3323808</button>
+          <button class="exact-btn px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded code-font">ELD05R100U0100W03</button>
+          <button class="exact-btn px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded code-font">EPD05R100U0100W05</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- API 數據來源與系統免責聲明卡片 -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4 mt-8">
+      <div class="flex items-center gap-2 text-sm font-bold text-slate-200">
+        <span class="text-sky-400">ℹ️</span>
+        <h3>API 數據來源與系統免責聲明 (Disclaimer)</h3>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6 text-xs text-slate-400 leading-relaxed">
+        <!-- 左欄：原始數據與 API 連線來源 -->
+        <div class="space-y-2">
+          <div class="flex items-center gap-1.5 font-semibold text-slate-300">
+            <span>🔗 原始數據與 API 連線來源：</span>
+          </div>
+          <p>本系統之刀具產品規格、CAD 連結及 AI 智能檢索數據，均直接連線自 <strong class="text-slate-200">Tungaloy Corporation（泰珂洛）官方 eCatalog Open API</strong>：</p>
+          
+          <!-- ★★★ 這裡完全依照您的指示，只修改顯示文字為純文字格式 ★★★ -->
+          <div class="group block p-3 bg-slate-950 rounded-xl border border-slate-800 transition">
+            <div class="code-font text-red-400 font-semibold break-all flex items-center justify-between">
+              <span>https://e-catalog-search-main-ae100fb.zuplo.site/api-quickstart</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右欄：使用免責聲明 -->
+        <div class="space-y-2">
+          <div class="flex items-center gap-1.5 font-semibold text-slate-300">
+            <span>⚖️ 使用免責聲明：</span>
+          </div>
+          <ul class="list-disc list-inside space-y-1.5 text-slate-400">
+            <li>本工具為前端連線介面，所有刀具型號、圖片、技術規格及品牌商標著作權均歸屬 <strong class="text-slate-200">Tungaloy Corporation</strong> 所有。</li>
+            <li>查詢結果由官方 API 即時回傳，僅供工程查詢參考。實際加工或下單前，請務必點擊連結確認官方 E-Catalog 最新規範。</li>
+            <li>金鑰（API Key）僅儲存於您個人的瀏覽器 LocalStorage，本網頁不設立任何中間伺服器收集或儲存您的私密金鑰。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 狀態與等待計時器區塊 -->
+    <div id="statusBox" class="hidden p-4 rounded-xl border border-slate-800 bg-slate-900/60 text-sm flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div id="spinner" class="w-5 h-5 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+        <span id="statusText" class="text-slate-300">正在連線 Tungaloy 官方雲端資料庫...</span>
+      </div>
+      <div id="timerText" class="text-xs code-font text-slate-500 font-semibold">0.0s</div>
+    </div>
+
+    <!-- 結果展現區域 -->
+    <div id="resultBox" class="hidden bg-slate-900/90 rounded-2xl border border-slate-800 p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <h2 class="text-base font-bold text-white">查詢結果數據 (zh-TW)</h2>
+        </div>
+        <div id="metaInfo" class="text-xs text-slate-500 code-font"></div>
+      </div>
+
+      <!-- 渲染 Markdown 或 表格的核心區 -->
+      <div id="contentRender" class="prose max-w-none text-slate-200"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // ★★★ 程式發送 API 請求的底層連線位址 (保持 d2.zuplo.dev 確保不壞掉) ★★★
+    const API_BASE = "https://e-catalog-search-main-ae100fb.d2.zuplo.dev";
+    
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const saveKeyBtn = document.getElementById('saveKeyBtn');
+    const toggleApiKey = document.getElementById('toggleApiKey');
+    
+    const tabSmart = document.getElementById('tabSmart');
+    const tabExact = document.getElementById('tabExact');
+    const panelSmart = document.getElementById('panelSmart');
+    const panelExact = document.getElementById('panelExact');
+    
+    const smartQueryInput = document.getElementById('smartQueryInput');
+    const smartSearchBtn = document.getElementById('smartSearchBtn');
+    const exactQueryInput = document.getElementById('exactQueryInput');
+    const exactSearchBtn = document.getElementById('exactSearchBtn');
+    
+    const statusBox = document.getElementById('statusBox');
+    const statusText = document.getElementById('statusText');
+    const timerText = document.getElementById('timerText');
+    const spinner = document.getElementById('spinner');
+    
+    const resultBox = document.getElementById('resultBox');
+    const metaInfo = document.getElementById('metaInfo');
+    const contentRender = document.getElementById('contentRender');
+    const loadMockBtn = document.getElementById('loadMockBtn');
+
+    let timerInterval = null;
+    let startTime = 0;
+
+    // 載入金鑰
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedKey = localStorage.getItem('tungaloy_api_key') || '';
+      apiKeyInput.value = savedKey;
+      
+      // Marked 設定
+      marked.setOptions({
+        breaks: true,
+        gfm: true
+      });
+    });
+
+    // 儲存金鑰
+    saveKeyBtn.addEventListener('click', () => {
+      const key = apiKeyInput.value.trim();
+      localStorage.setItem('tungaloy_api_key', key);
+      alert('已成功儲存 API 金鑰至本地儲存區！');
+    });
+
+    toggleApiKey.addEventListener('click', () => {
+      apiKeyInput.type = apiKeyInput.type === 'password' ? 'text' : 'password';
+    });
+
+    // 頁籤切換
+    tabSmart.addEventListener('click', () => {
+      tabSmart.className = "pb-3 text-sm font-bold text-red-500 border-b-2 border-red-500 flex items-center gap-2 transition";
+      tabExact.className = "pb-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 flex items-center gap-2 transition";
+      panelSmart.classList.remove('hidden');
+      panelExact.classList.add('hidden');
+    });
+
+    tabExact.addEventListener('click', () => {
+      tabExact.className = "pb-3 text-sm font-bold text-red-500 border-b-2 border-red-500 flex items-center gap-2 transition";
+      tabSmart.className = "pb-3 text-sm font-bold text-slate-400 border-b-2 border-transparent hover:text-slate-200 flex items-center gap-2 transition";
+      panelExact.classList.remove('hidden');
+      panelSmart.classList.add('hidden');
+    });
+
+    // 快速查詢按鈕點擊
+    document.querySelectorAll('.quick-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        smartQueryInput.value = btn.innerText;
+        triggerSmartSearch();
+      });
+    });
+
+    document.querySelectorAll('.exact-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        exactQueryInput.value = btn.innerText;
+        triggerExactSearch();
+      });
+    });
+
+    // 計時器控制
+    function startTimer() {
+      startTime = Date.now();
+      timerText.innerText = "0.0s";
+      timerInterval = setInterval(() => {
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        timerText.innerText = `${elapsed}s`;
+      }, 100);
+    }
+
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+    }
+
+    // 強制所有連結在新分頁開啟
+    function enforceNewTabLinks() {
+      const links = contentRender.querySelectorAll('a');
+      links.forEach(link => {
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener noreferrer');
+      });
+    }
+
+    // 發送請求核心 (包含代理備援與 90 秒逾時)
+    async function fetchApiWithTimeout(endpoint, bodyData) {
+      const token = apiKeyInput.value.trim();
+      if (!token) {
+        throw new Error('請先在頂部輸入並儲存您的 API Bearer Token！');
+      }
+
+      const isCorsProxy = document.getElementById('corsToggle').checked;
+      const targetUrl = `${API_BASE}${endpoint}`;
+      
+      const proxies = isCorsProxy ? [
+        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+        targetUrl
+      ] : [targetUrl];
+
+      let lastError = null;
+
+      for (const url of proxies) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 90000);
+
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(bodyData),
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          if (!res.ok) {
+            throw new Error(`伺服器回應錯誤碼: ${res.status} ${res.statusText}`);
+          }
+
+          return await res.json();
+        } catch (err) {
+          clearTimeout(timeoutId);
+          if (err.name === 'AbortError') {
+            lastError = new Error('請求逾時 (已等待超過 90 秒)，請重新發送。');
+          } else {
+            lastError = err;
+          }
+        }
+      }
+
+      throw lastError || new Error('Failed to fetch');
+    }
+
+    // 1. AI 智能搜尋
+    smartSearchBtn.addEventListener('click', triggerSmartSearch);
+
+    async function triggerSmartSearch() {
+      const q = smartQueryInput.value.trim();
+      if (!q) return alert('請輸入搜尋關鍵字！');
+
+      statusBox.classList.remove('hidden');
+      resultBox.classList.add('hidden');
+      statusText.innerText = 'AI 智能檢索中 (正在檢索巨量目錄庫，約需 10-30 秒)...';
+      spinner.classList.remove('hidden');
+      startTimer();
+
+      try {
+        const data = await fetchApiWithTimeout('/v1/catalog/smart-search', {
+          query: q,
+          language: 'zh-TW'
+        });
+
+        stopTimer();
+        statusBox.classList.add('hidden');
+        resultBox.classList.remove('hidden');
+
+        metaInfo.innerText = `查詢時間: ${new Date().toLocaleTimeString()}  |  Workflow ID: ${data.workflow_run_id || 'N/A'}`;
+
+        const rawText = data.result || (data.outputs ? data.outputs.text : '') || '無可顯示的搜尋結果';
         
-        <!-- CORS 中繼站設定開關與說明 -->
-        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3 mb-6 flex items-center justify-between gap-4 text-xs">
-            <div class="flex items-center gap-2 text-slate-400">
-                <i class="fa-solid fa-shield-halved text-amber-500"></i>
-                <span>瀏覽器跨網域相容模式 (CORS Proxy + 90s 長連線)：</span>
+        let htmlContent = marked.parse(rawText);
+        htmlContent = htmlContent.replace(/<table>/g, '<div class="prose-table-container"><table>').replace(/<\/table>/g, '</table></div>');
+        
+        contentRender.innerHTML = htmlContent;
+        enforceNewTabLinks();
+
+      } catch (err) {
+        stopTimer();
+        spinner.classList.add('hidden');
+        statusText.innerText = '查詢發生錯誤：' + err.message;
+        statusText.className = 'text-red-400 font-bold';
+      }
+    }
+
+    // 2. 精準型號查詢
+    exactSearchBtn.addEventListener('click', triggerExactSearch);
+
+    async function triggerExactSearch() {
+      const itemNo = exactQueryInput.value.trim();
+      if (!itemNo) return alert('請輸入刀具型號！');
+
+      statusBox.classList.remove('hidden');
+      resultBox.classList.add('hidden');
+      statusText.innerText = '正在抓取型號精準規格...';
+      spinner.classList.remove('hidden');
+      startTimer();
+
+      try {
+        const data = await fetchApiWithTimeout('/v1/catalog/exact-search', {
+          query: itemNo,
+          language: 'zh-TW'
+        });
+
+        stopTimer();
+        statusBox.classList.add('hidden');
+        resultBox.classList.remove('hidden');
+
+        metaInfo.innerText = `查詢時間: ${new Date().toLocaleTimeString()}  |  Workflow ID: ${data.workflow_run_id || 'N/A'}`;
+
+        renderExactSearchResults(data, itemNo);
+        enforceNewTabLinks();
+
+      } catch (err) {
+        stopTimer();
+        spinner.classList.add('hidden');
+        statusText.innerText = '查詢發生錯誤：' + err.message;
+        statusText.className = 'text-red-400 font-bold';
+      }
+    }
+
+    // 解析精準查詢 JSON 轉換為高品質表格
+    function renderExactSearchResults(data, itemNo) {
+      if (!data || !data.items || data.items.length === 0) {
+        contentRender.innerHTML = `<div class="p-4 bg-slate-800/50 rounded-lg text-amber-400">⚠️ 找不到型號「${itemNo}」的相關數據紀錄。</div>`;
+        return;
+      }
+
+      const item = data.items[0];
+      const colDefs = data.columnDefinitions || {};
+      
+      const catalogUrl = item.itemSpec?.["E-catalog_url"] || item["E-catalog_url"] || item.itemSpec?.E_catalog_url || (item.itemSpec && item.itemSpec.url);
+
+      let headerHtml = `
+        <div class="p-5 bg-gradient-to-r from-slate-950 to-slate-900 border border-slate-800 rounded-xl mb-6 shadow-md space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div class="text-xs text-red-400 font-bold tracking-wider uppercase">Tungaloy Exact Match Item</div>
+              <div class="text-xl font-bold text-white code-font mt-0.5">${item.DESCRIPTION || itemNo} <span class="text-slate-400 text-sm font-normal">(${item.ITEMNUM || itemNo})</span></div>
+              <div class="text-xs text-slate-400 mt-1">${item.product_name || ''} | ${item.MainApplication || ''} - ${item.SubApplication || ''}</div>
             </div>
-            <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="corsProxyToggle" class="sr-only peer" checked>
-                <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
-                <span id="proxyStatusText" class="ml-2 font-medium text-emerald-400">已開啟 (備援轉發)</span>
-            </label>
-        </div>
-
-        <!-- 功能切換 Tabs -->
-        <div class="flex border-b border-slate-800 mb-8">
-            <button id="tab-smart" class="border-b-2 border-red-500 px-6 py-3 font-medium text-slate-100 flex items-center gap-2 transition-all">
-                <i class="fa-solid fa-wand-magic-sparkles text-red-500"></i> AI 智能搜尋 (Smart Search)
-            </button>
-            <button id="tab-exact" class="border-b-2 border-transparent px-6 py-3 font-medium text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all">
-                <i class="fa-solid fa-barcode"></i> 精準型號查詢 (Item Lookup)
-            </button>
-        </div>
-
-        <!-- 區域一：AI 智能搜尋面板 -->
-        <div id="panel-smart" class="space-y-6">
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-                <p class="text-sm text-slate-400 mb-3"><i class="fa-solid fa-info-circle mr-1"></i> 請用「台灣繁體中文」向 AI 尋找刀具規格、加工方法或詢問推薦。</p>
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="smartQueryInput" 
-                           class="flex-grow px-4 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-lg text-slate-100 focus:outline-none focus:border-red-500 transition-all placeholder-slate-500"
-                           placeholder="例如：幫我推薦適合加工不鏽鋼的 10mm 鑽頭...">
-                    <button id="smartSearchBtn" class="bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 active:scale-95 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-paper-plane"></i> 傳送搜尋
-                    </button>
-                </div>
-
-                <!-- 快速測試標籤與範例資料載入 -->
-                <div class="mt-4 flex flex-wrap items-center gap-2">
-                    <span class="text-xs text-slate-500 mr-2 font-medium">快速測試：</span>
-                    <button class="quick-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">Find 1 mm end mills</button>
-                    <button class="quick-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">直徑 10mm 的 DrillMeister 鑽頭</button>
-                    <button class="quick-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">加工不鏽鋼（SUS304）推薦刀具</button>
-                    <button id="loadMockBtn" class="bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-600/50 text-xs px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 font-medium ml-auto">
-                        <i class="fa-solid fa-flask"></i> 🧪 載入測試範例數據 (免連線)
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 區域二：精準型號查詢面板 -->
-        <div id="panel-exact" class="space-y-6 hidden">
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-                <p class="text-sm text-slate-400 mb-3"><i class="fa-solid fa-info-circle mr-1"></i> 輸入正確完整的 Tungaloy 刀具或配件型號，獲取核心規格細節。</p>
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <input type="text" id="exactQueryInput" 
-                           class="flex-grow px-4 py-4 bg-slate-800/80 border border-slate-700 rounded-xl text-lg text-slate-100 focus:outline-none focus:border-red-500 transition-all placeholder-slate-500 uppercase"
-                           placeholder="例如：3323808 或 ELD05R100U0100W03 或 EPD05R100U0100W05">
-                    <button id="exactSearchBtn" class="bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold px-8 py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-search"></i> 精準查詢
-                    </button>
-                </div>
-                <!-- 快速測試型號 -->
-                <div class="mt-4 flex flex-wrap items-center gap-2">
-                    <span class="text-xs text-slate-500 mr-2 font-medium">熱門型號：</span>
-                    <button class="quick-model-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">3323808</button>
-                    <button class="quick-model-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">ELD05R100U0100W03</button>
-                    <button class="quick-model-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">EPD05R100U0100W05</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="statusArea" class="mt-8">
-            <div id="alertNoKey" class="bg-amber-950/40 border border-amber-800/60 p-4 rounded-xl flex items-start gap-3">
-                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg mt-0.5"></i>
-                <div>
-                    <h4 class="font-bold text-amber-200 text-sm">請先在右上角輸入 API Key 才能執行搜尋</h4>
-                    <p class="text-xs text-amber-300/80 mt-1">請填寫對方提供給您的 Tungaloy API 金鑰，點擊「儲存金鑰」後即可開始搜尋。</p>
-                </div>
-            </div>
-
-            <!-- 帶即時秒數計時器之載入中動畫 -->
-            <div id="loader" class="hidden flex flex-col items-center justify-center py-12 bg-slate-900/40 border border-slate-800 rounded-2xl">
-                <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-800 border-t-red-500 mb-4"></div>
-                <p id="loaderMessage" class="text-sm font-medium text-slate-200 mb-1">正在連線 Tungaloy 官方雲端資料庫...</p>
-                <p class="text-xs text-slate-400">Tungaloy AI 正在進行深度檢索與數據排版，請稍候：<span id="timerText" class="text-amber-400 font-mono font-bold">已等待 0 秒</span></p>
-            </div>
-
-            <!-- 錯誤提示 -->
-            <div id="errorAlert" class="hidden bg-red-950/40 border border-red-900/60 p-4 rounded-xl flex items-start gap-3">
-                <i class="fa-solid fa-circle-xmark text-red-500 text-lg mt-0.5"></i>
-                <div>
-                    <h4 class="font-bold text-red-200 text-sm">查詢發生錯誤</h4>
-                    <p id="errorText" class="text-xs text-red-300/80 mt-1">請檢查您的網路連線或 API Key 是否正確。</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="resultContainer" class="hidden mt-8 space-y-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-                <div class="bg-slate-800/50 px-6 py-4 border-b border-slate-800 flex justify-between items-center flex-wrap gap-2">
-                    <div class="flex items-center gap-2">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <h3 class="font-bold text-slate-200">查詢結果數據 (zh-TW)</h3>
-                    </div>
-                    <div class="text-xs text-slate-400 flex gap-4">
-                        <span id="resultTime">查詢時間: --</span>
-                        <span id="resultWorkflow" class="hidden sm:inline">ID: --</span>
-                    </div>
-                </div>
-                
-                <div class="p-6 space-y-4">
-                    <!-- 全版寬高質感表格顯示卡片 -->
-                    <div id="smartResultCard" class="prose prose-invert max-w-none text-slate-300 leading-relaxed bg-slate-950/60 p-5 rounded-xl border border-slate-800 overflow-x-auto">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-12 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-6 text-xs text-slate-400 leading-relaxed space-y-3">
-            <div class="flex items-center gap-2 text-slate-300 font-bold border-b border-slate-800 pb-2">
-                <i class="fa-solid fa-circle-info text-sky-400"></i>
-                <span>API 數據來源與系統免責聲明 (Disclaimer)</span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                <div>
-                    <p class="font-semibold text-slate-300 mb-1">🔗 原始數據與 API 連線來源：</p>
-                    <p>本系統之刀具產品規格、CAD 連結及 AI 智能檢索數據，均直接連線自 <strong class="text-slate-200">Tungaloy Corporation（泰珂洛）官方 eCatalog Open API</strong>：</p>
-                    <p class="font-mono text-slate-400 bg-slate-950 px-2 py-1 rounded mt-1 inline-block border border-slate-800">https://e-catalog-search-main-ae100fb.d2.zuplo.dev</p>
-                </div>
-                <div>
-                    <p class="font-semibold text-slate-300 mb-1">⚖️ 使用免責聲明：</p>
-                    <ul class="list-disc list-inside space-y-1 text-slate-400">
-                        <li>本工具為前端連線介面，所有刀具型號、圖片、技術規格及品牌商標著作權均歸屬 <strong class="text-slate-300">Tungaloy Corporation</strong> 所有。</li>
-                        <li>查詢結果由官方 API 即時回傳，僅供工程查詢參考。實際加工或下單前，請務必點擊連結確認官方 E-Catalog 最新規範。</li>
-                        <li>金鑰（API Key）僅儲存於您個人的瀏覽器 LocalStorage，本網頁不設立任何中間伺服器收集或儲存您的私密金鑰。</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer class="border-t border-slate-800 bg-slate-950/50 py-6 text-center text-xs text-slate-500">
-        <p class="mb-1">Tungaloy eCatalog AI Search Web Client (zh-TW)</p>
-        <p>本網頁採用 Tungaloy 官方開放 API 直接通訊，安全不經手第三方伺服器。</p>
-    </footer>
-
-    <script>
-        // 金鑰消毒函數
-        function sanitizeApiKey(rawKey) {
-            if (!rawKey) return '';
-            return rawKey
-                .replace(/\u3000/g, ' ')  
-                .replace(/[^\x20-\x7E]/g, '') 
-                .trim();
-        }
-
-        // 安全 LocalStorage 助手
-        const safeStorage = {
-            get: (key) => { try { return localStorage.getItem(key); } catch (e) { return null; } },
-            set: (key, value) => { try { localStorage.setItem(key, value); return true; } catch (e) { return false; } },
-            remove: (key) => { try { localStorage.removeItem(key); return true; } catch (e) { return false; } }
-        };
-
-        // DOM 元素取得
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const togglePassword = document.getElementById('togglePassword');
-        const eyeIcon = document.getElementById('eyeIcon');
-        const saveKeyBtn = document.getElementById('saveKeyBtn');
-
-        const corsProxyToggle = document.getElementById('corsProxyToggle');
-        const proxyStatusText = document.getElementById('proxyStatusText');
-
-        const tabSmart = document.getElementById('tab-smart');
-        const tabExact = document.getElementById('tab-exact');
-        const panelSmart = document.getElementById('panel-smart');
-        const panelExact = document.getElementById('panel-exact');
-
-        const smartQueryInput = document.getElementById('smartQueryInput');
-        const smartSearchBtn = document.getElementById('smartSearchBtn');
-        const exactQueryInput = document.getElementById('exactQueryInput');
-        const exactSearchBtn = document.getElementById('exactSearchBtn');
-
-        const statusArea = document.getElementById('statusArea');
-        const alertNoKey = document.getElementById('alertNoKey');
-        const loader = document.getElementById('loader');
-        const loaderMessage = document.getElementById('loaderMessage');
-        const timerText = document.getElementById('timerText');
-        const errorAlert = document.getElementById('errorAlert');
-        const errorText = document.getElementById('errorText');
-
-        const resultContainer = document.getElementById('resultContainer');
-        const smartResultCard = document.getElementById('smartResultCard');
-        const resultTime = document.getElementById('resultTime');
-        const resultWorkflow = document.getElementById('resultWorkflow');
-        const loadMockBtn = document.getElementById('loadMockBtn');
-
-        const baseApi = "https://e-catalog-search-main-ae100fb.d2.zuplo.dev";
-
-        // 即時計時器管理
-        let timerInterval = null;
-        let secondsElapsed = 0;
-
-        function startTimer() {
-            secondsElapsed = 0;
-            timerText.textContent = `已等待 0 秒`;
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                secondsElapsed++;
-                timerText.textContent = `已等待 ${secondsElapsed} 秒`;
-            }, 1000);
-        }
-
-        function stopTimer() {
-            clearInterval(timerInterval);
-        }
-
-        function updateLoaderMessage(msg) {
-            loaderMessage.textContent = msg;
-        }
-
-        // 強制確保所有連結一律另開視窗 (target="_blank")
-        function enforceNewTabLinks(container) {
-            if (!container) return;
-            const links = container.querySelectorAll('a');
-            links.forEach(link => {
-                link.setAttribute('target', '_blank');
-                link.setAttribute('rel', 'noopener noreferrer');
-            });
-        }
-
-        // 核心 API 呼叫 (90 秒長連線與多重代理備援)
-        async function fetchApi(endpoint, options = {}) {
-            const cleanKey = sanitizeApiKey(apiKeyInput.value);
-            const fullTarget = baseApi + endpoint;
             
-            const headers = {
-                'Authorization': `Bearer ${cleanKey}`,
-                'Content-Type': 'application/json',
-                ...(options.headers || {})
-            };
+            ${catalogUrl ? `
+              <a href="${catalogUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white font-bold text-xs rounded-xl transition flex items-center gap-2 shadow-lg shadow-red-950/40">
+                <span>🔗 開啟 Tungaloy 官方 E-Catalog (CAD/3D)</span>
+                <span>↗</span>
+              </a>
+            ` : ''}
+          </div>
+        </div>
+      `;
 
-            const payloadBody = options.body ? (typeof options.body === 'string' ? options.body : JSON.stringify(options.body)) : null;
+      const ignoreKeys = ['source_file', 'source_row', 'itemSpec', 'DESCRIPTION', 'ITEMNUM', 'product_name', 'MainApplication', 'SubApplication'];
 
-            // 定義備用代理管道
-            let proxyList = [];
-            if (corsProxyToggle.checked) {
-                proxyList = [
-                    { name: "CorsProxy.io 中繼站", url: (target) => `https://corsproxy.io/?url=${encodeURIComponent(target)}` },
-                    { name: "AllOrigins 中繼站", url: (target) => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}` },
-                    { name: "CodeTabs 中繼站", url: (target) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(target)}` },
-                    { name: "原生直連模式", url: (target) => target }
-                ];
-            } else {
-                proxyList = [
-                    { name: "原生直連模式", url: (target) => target },
-                    { name: "CorsProxy.io 中繼站", url: (target) => `https://corsproxy.io/?url=${encodeURIComponent(target)}` }
-                ];
-            }
+      let rowsHtml = '';
+      for (const [key, val] of Object.entries(item)) {
+        if (ignoreKeys.includes(key) || val === null || val === undefined || val === '') continue;
 
-            let lastError = null;
+        const labelName = colDefs[key] || key;
+        const displayVal = (typeof val === 'object') ? JSON.stringify(val) : val;
 
-            for (const proxy of proxyList) {
-                try {
-                    updateLoaderMessage(`正在透過 [${proxy.name}] 連線 Tungaloy 資料庫...`);
-                    
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 90000);
+        rowsHtml += `
+          <tr>
+            <td class="font-semibold text-slate-300 w-1/2">${labelName} <span class="text-slate-500 text-xs code-font">(${key})</span></td>
+            <td class="code-font text-emerald-400 font-bold w-1/2">${displayVal}</td>
+          </tr>
+        `;
+      }
 
-                    const targetUrl = proxy.url(fullTarget);
-                    const response = await fetch(targetUrl, {
-                        method: options.method || 'GET',
-                        headers: headers,
-                        body: payloadBody,
-                        signal: controller.signal
-                    });
+      contentRender.innerHTML = `
+        ${headerHtml}
+        <h3 class="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+          <span>📊 核心規格參數明細表 (Specification Attributes)</span>
+        </h3>
+        <div class="prose-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>規格欄位 (Feature)</th>
+                <th>核心參數值 (Value)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
 
-                    clearTimeout(timeoutId);
+    // 離線範例數據載入
+    loadMockBtn.addEventListener('click', () => {
+      statusBox.classList.add('hidden');
+      resultBox.classList.remove('hidden');
+      metaInfo.innerText = `展示數據載入時間: ${new Date().toLocaleTimeString()} (離線測試)`;
 
-                    if (response.ok || response.status === 401 || response.status === 403 || response.status === 404) {
-                        return response;
-                    }
-                } catch (e) {
-                    lastError = e;
-                    console.warn(`代理管道 [${proxy.name}] 嘗試失敗:`, e);
-                }
-            }
+      const mockMarkdown = `Found **124 milling items** with cutter diameter 1 mm. Here are the first 10 matches.
 
-            throw lastError || new Error("連線逾時，請檢查網路狀態或切換代理模式");
-        }
+| Item No. | Description | Product / Series | Type | Application | DC / DCX (mm) | Flutes | LF/OAL (mm) | APMX (mm) | Grade | Link |
+|---|---|---|---|---|---:|---:|---:|---:|---|---|
+| **3106317** | EPD05R100U0100W05 | TungQuad / EPD05 | Indexable tool | Shoulder Milling | 1 / 1 | 5 | 4 / 4 | 0.157 | — | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=3106317&search=P&choose=c) |
+| **3112200** | ELD05R100U0100W03 | TungQuad / ELD05 | Indexable tool | Shoulder Milling | 1 / 1 | 3 | 3.75 / 3.75 | 0.953 | — | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=3112200&search=P&choose=c) |
+| **3323808** | TECA010H3-04C06CF-R.05 | VariableMeister Square / TECA-H3-CF-R | Solid | Shoulder Milling | 1 / — | — | 57 | 4 | KS15F | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=3323808&search=P&choose=c) |
+| **5650040** | TEB010A2-02/04/3.0C06M80 | SolidMeister Ball / TEB-A2 tapered neck | Solid | Profile Milling | 1 / — | 2 | 80 | 2 | AH750 | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=5650040&search=P&choose=c) |
+| **5650077** | TEB010A2-01/02C04H50 | SolidMeister Ball / TEB-A2-C-H | Solid | Profile Milling | 1 / — | 2 | 50 | 1 | AH750 | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=5650077&search=P&choose=c) |
 
-        // 代理開關狀態更新
-        corsProxyToggle.addEventListener('change', () => {
-            if (corsProxyToggle.checked) {
-                proxyStatusText.textContent = "已開啟 (備援轉發)";
-                proxyStatusText.className = "ml-2 font-medium text-emerald-400";
-            } else {
-                proxyStatusText.textContent = "已停用 (原生模式)";
-                proxyStatusText.className = "ml-2 font-medium text-amber-400";
-            }
-        });
+> ℹ️ *提示：點擊右側的 E-catalog 按鈕可在新頁籤直接預覽原廠 3D 圖紙與 ISO 規範。*`;
 
-        // 初始化金鑰
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedKey = safeStorage.get('tungaloy_api_key');
-            if (savedKey) {
-                apiKeyInput.value = savedKey;
-                alertNoKey.classList.add('hidden');
-            }
-        });
+      let htmlContent = marked.parse(mockMarkdown);
+      htmlContent = htmlContent.replace(/<table>/g, '<div class="prose-table-container"><table>').replace(/<\/table>/g, '</table></div>');
 
-        // 密碼切換
-        togglePassword.addEventListener('click', () => {
-            if (apiKeyInput.type === 'password') {
-                apiKeyInput.type = 'text';
-                eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                apiKeyInput.type = 'password';
-                eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        });
-
-        // 儲存金鑰
-        saveKeyBtn.addEventListener('click', () => {
-            const cleanKey = sanitizeApiKey(apiKeyInput.value);
-            apiKeyInput.value = cleanKey;
-            if (cleanKey) {
-                safeStorage.set('tungaloy_api_key', cleanKey);
-                alertNoKey.classList.add('hidden');
-                alert('🎉 API Key 已完成設定！');
-            } else {
-                safeStorage.remove('tungaloy_api_key');
-                alertNoKey.classList.remove('hidden');
-                alert('⚠️ 金鑰已清除！');
-            }
-        });
-
-        // Tab 切換
-        tabSmart.addEventListener('click', () => {
-            tabSmart.className = "border-b-2 border-red-500 px-6 py-3 font-medium text-slate-100 flex items-center gap-2 transition-all";
-            tabExact.className = "border-b-2 border-transparent px-6 py-3 font-medium text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all";
-            panelSmart.classList.remove('hidden');
-            panelExact.classList.add('hidden');
-            resultContainer.classList.add('hidden');
-        });
-
-        tabExact.addEventListener('click', () => {
-            tabExact.className = "border-b-2 border-red-500 px-6 py-3 font-medium text-slate-100 flex items-center gap-2 transition-all";
-            tabSmart.className = "border-b-2 border-transparent px-6 py-3 font-medium text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all";
-            panelExact.classList.remove('hidden');
-            panelSmart.classList.add('hidden');
-            resultContainer.classList.add('hidden');
-        });
-
-        document.querySelectorAll('.quick-tag').forEach(tag => {
-            tag.addEventListener('click', (e) => {
-                smartQueryInput.value = e.target.textContent;
-                triggerSmartSearch();
-            });
-        });
-
-        document.querySelectorAll('.quick-model-tag').forEach(tag => {
-            tag.addEventListener('click', (e) => {
-                exactQueryInput.value = e.target.textContent;
-                triggerExactSearch();
-            });
-        });
-
-        // 渲染範例數據（測試表單用）
-        loadMockBtn.addEventListener('click', () => {
-            const mockText = `Found 124 milling items with cutter diameter 1 mm. Here are the first 10 matches.\n\n| Item No. | Description | Product / Series | Type | Application | DC / DCX (mm) | Flutes | LF/OAL (mm) | APMX (mm) | Grade | Link |\n|---|---|---|---|---|---:|---:|---:|---:|---|---|\n| 3106317 | EPD05R100U0100W05 | TungQuad / EPD05 | Indexable tool | Shoulder Milling | 1 / 1 | 5 | 4 / 4 | 0.157 | — | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=3106317&search=P&choose=c) |\n| 3112200 | ELD05R100U0100W03 | TungQuad / ELD05 | Indexable tool | Shoulder Milling | 1 / 1 | 3 | 3.75 / 3.75 | 0.953 | — | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=3112200&search=P&choose=c) |\n| 3323808 | TECA010H3-04C06CF-R.05 | VariableMeister Square / TECA-H3-CF-R | Solid | Shoulder Milling | 1 / — | — | 57 | 4 | KS15F | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=3323808&search=P&choose=c) |\n| 5650040 | TEB010A2-02/04/3.0C06M80 | SolidMeister Ball / TEB-A2 tapered neck | Solid | Profile Milling | 1 / — | 2 | 80 | 2 | AH750 | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=5650040&search=P&choose=c) |`;
-            
-            resultTime.textContent = `查詢時間: ${new Date().toLocaleTimeString()} (測試範例數據)`;
-            resultWorkflow.textContent = `Workflow ID: MOCK-DATA-TEST`;
-            resultWorkflow.classList.remove('hidden');
-
-            smartResultCard.innerHTML = marked.parse(mockText);
-            enforceNewTabLinks(smartResultCard);
-            resultContainer.classList.remove('hidden');
-            errorAlert.classList.add('hidden');
-        });
-
-        // AI 智能搜尋
-        async function triggerSmartSearch() {
-            const cleanKey = sanitizeApiKey(apiKeyInput.value);
-            apiKeyInput.value = cleanKey;
-            const query = smartQueryInput.value.trim();
-
-            if (!cleanKey) {
-                alert('⚠️ 請填寫金鑰（API Key）！');
-                alertNoKey.classList.remove('hidden');
-                return;
-            }
-            if (!query) {
-                alert('⚠️ 請輸入您的搜尋需求！');
-                return;
-            }
-
-            errorAlert.classList.add('hidden');
-            resultContainer.classList.add('hidden');
-            loader.classList.remove('hidden');
-            startTimer();
-
-            try {
-                const response = await fetchApi('/v1/catalog/smart-search', {
-                    method: 'POST',
-                    body: {
-                        query: query,
-                        limit: 10,
-                        language: 'zh-TW'
-                    }
-                });
-
-                if (!response.ok) {
-                    if (response.status === 401 || response.status === 403) {
-                        throw new Error(`金鑰驗證失敗 (HTTP ${response.status})。請檢查 API Key 是否正確。`);
-                    }
-                    throw new Error(`伺服器回應錯誤 (狀態碼: ${response.status})。`);
-                }
-
-                const data = await response.json();
-                
-                resultTime.textContent = `查詢時間: ${new Date().toLocaleTimeString()}`;
-                resultWorkflow.textContent = `Workflow ID: ${data.workflow_run_id || 'N/A'}`;
-                resultWorkflow.classList.remove('hidden');
-
-                smartResultCard.innerHTML = marked.parse(data.result || "無回傳結果");
-                enforceNewTabLinks(smartResultCard);
-                
-                resultContainer.classList.remove('hidden');
-
-            } catch (err) {
-                let msg = err.message;
-                if (err.name === 'AbortError') {
-                    msg = "連線超時 (已等待超過 90 秒)。Tungaloy AI 後端目前回應較慢，建議稍後再試，或使用「🧪 載入測試範例數據」體驗。";
-                }
-                errorText.textContent = msg || "連線失敗，請檢查網路或切換代理模式";
-                errorAlert.classList.remove('hidden');
-            } finally {
-                stopTimer();
-                loader.classList.add('hidden');
-            }
-        }
-
-        // 精準型號查詢（重點修正：修復 catalog_url 未定義之 ReferenceError，安全解析表格）
-        async function triggerExactSearch() {
-            const cleanKey = sanitizeApiKey(apiKeyInput.value);
-            apiKeyInput.value = cleanKey;
-            const itemNumber = exactQueryInput.value.trim().toUpperCase();
-
-            if (!cleanKey) {
-                alert('⚠️ 請填寫金鑰（API Key）！');
-                alertNoKey.classList.remove('hidden');
-                return;
-            }
-            if (!itemNumber) {
-                alert('⚠️ 請輸入完整的商品型號！');
-                return;
-            }
-
-            errorAlert.classList.add('hidden');
-            resultContainer.classList.add('hidden');
-            loader.classList.remove('hidden');
-            startTimer();
-
-            try {
-                const response = await fetchApi(`/v1/catalog/items/${encodeURIComponent(itemNumber)}`, {
-                    method: 'GET'
-                });
-
-                if (!response.ok) {
-                    if (response.status === 401 || response.status === 403) {
-                        throw new Error(`金鑰驗證失敗 (HTTP ${response.status})。請檢查 API Key 是否正確。`);
-                    }
-                    throw new Error(`找不到該型號 (${itemNumber}) 或伺服器回應錯誤 (HTTP ${response.status})。`);
-                }
-
-                const data = await response.json();
-                
-                resultTime.textContent = `查詢時間: ${new Date().toLocaleTimeString()}`;
-                resultWorkflow.classList.add('hidden');
-
-                // 提取核心物件與字典欄位
-                let itemData = null;
-                if (data.items && Array.isArray(data.items) && data.items.length > 0) {
-                    itemData = data.items[0];
-                } else if (typeof data === 'object' && !data.items) {
-                    itemData = data;
-                }
-
-                const colDefs = data.columnDefinitions || {};
-
-                if (itemData) {
-                    // 安全抓取 Catalog 連結（修正先前造成變數未定義之錯誤）
-                    let catalogUrl = itemData.catalog_url || 
-                                     itemData.E_catalog_url || 
-                                     itemData["E-catalog_url"] || 
-                                     itemData.itemSpec?.["E-catalog_url"] || 
-                                     itemData.itemSpec?.E_catalog_url || 
-                                     `http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=${encodeURIComponent(itemNumber)}&search=P&choose=c`;
-
-                    let desc = itemData.DESCRIPTION || itemData.product_name || itemNumber;
-                    let series = itemData.series || itemData.product_name || 'Tungaloy Series';
-                    let app = [itemData.MainApplication, itemData.SubApplication].filter(Boolean).join(' / ') || 'General Machining';
-
-                    let htmlContent = `
-                        <!-- 頂部產品卡片 -->
-                        <div class="bg-gradient-to-r from-red-950/80 via-slate-900 to-slate-900 border border-red-800/60 rounded-xl p-5 mb-6 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                            <div>
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="bg-red-600/30 text-red-400 text-xs font-bold px-2.5 py-0.5 rounded border border-red-500/30">精準型號數據</span>
-                                    <h3 class="text-xl font-bold text-slate-100 font-mono">${itemNumber}</h3>
-                                </div>
-                                <p class="text-sm text-slate-300 font-medium">${desc}</p>
-                                <div class="flex flex-wrap gap-4 text-xs text-slate-400 mt-2">
-                                    <span><i class="fa-solid fa-layer-group text-amber-500 mr-1"></i>系列：<strong class="text-slate-200">${series}</strong></span>
-                                    <span><i class="fa-solid fa-gears text-amber-500 mr-1"></i>應用：<strong class="text-slate-200">${app}</strong></span>
-                                </div>
-                            </div>
-                            <a href="${catalogUrl}" target="_blank" rel="noopener noreferrer" 
-                               class="bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-bold px-5 py-3 rounded-xl text-xs flex items-center gap-2 shadow-lg hover:shadow-red-900/40 transition-all whitespace-nowrap">
-                               <i class="fa-solid fa-external-link-alt"></i> 前往 Tungaloy 官方 E-catalog (CAD/3D)
-                            </a>
-                        </div>
-                    `;
-
-                    // 剔除內部無效與除錯鍵名
-                    const filterKeys = ['source_file', 'source_row', 'columnDefinitions', 'responseDefinitions', 'query', 'warnings', 'hasMore', 'nextOffset', 'searchMode', 'resultCount', 'returnedCount', 'nextSuggestedFilters', 'items', 'itemSpec'];
-
-                    let tableRows = '';
-                    Object.entries(itemData).forEach(([key, val]) => {
-                        if (filterKeys.includes(key)) return;
-                        if (val === null || val === undefined || val === '') return;
-
-                        let label = colDefs[key] || key;
-                        let displayVal = typeof val === 'object' ? JSON.stringify(val) : val;
-
-                        if (typeof displayVal === 'string' && (displayVal.startsWith('http://') || displayVal.startsWith('https://'))) {
-                            displayVal = `<a href="${displayVal}" target="_blank" rel="noopener noreferrer" class="text-red-400 hover:underline inline-flex items-center gap-1"><i class="fa-solid fa-link"></i> 開啟連結 🔗</a>`;
-                        }
-
-                        tableRows += `
-                            <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 transition-colors">
-                                <td class="px-5 py-3 font-semibold text-slate-300 text-xs sm:text-sm w-1/2">${label} <span class="text-slate-500 text-xs font-mono ml-1">(${key})</span></td>
-                                <td class="px-5 py-3 text-emerald-400 font-mono text-xs sm:text-sm select-all">${displayVal}</td>
-                            </tr>
-                        `;
-                    });
-
-                    htmlContent += `
-                        <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/80">
-                            <table class="w-full text-left border-collapse">
-                                <thead class="bg-slate-950 text-slate-400 text-xs uppercase border-b border-slate-800">
-                                    <tr>
-                                        <th class="px-5 py-3">規格欄位 (Feature)</th>
-                                        <th class="px-5 py-3">核心參數值 (Value)</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-800">
-                                    ${tableRows || '<tr><td colspan="2" class="px-5 py-4 text-center text-slate-500">無額外規格數據。</td></tr>'}
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-
-                    smartResultCard.innerHTML = htmlContent;
-                    enforceNewTabLinks(smartResultCard);
-                    resultContainer.classList.remove('hidden');
-
-                } else {
-                    smartResultCard.innerHTML = `<p class="text-slate-400">未找到該型號 (${itemNumber}) 的詳細屬性數據。</p>`;
-                    resultContainer.classList.remove('hidden');
-                }
-
-            } catch (err) {
-                errorText.textContent = err.message;
-                errorAlert.classList.remove('hidden');
-            } finally {
-                stopTimer();
-                loader.classList.add('hidden');
-            }
-        }
-
-        // 綁定事件
-        smartSearchBtn.addEventListener('click', triggerSmartSearch);
-        smartQueryInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') triggerSmartSearch();
-        });
-
-        exactSearchBtn.addEventListener('click', triggerExactSearch);
-        exactQueryInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') triggerExactSearch();
-        });
-    </script>
+      contentRender.innerHTML = htmlContent;
+      enforceNewTabLinks();
+    });
+  </script>
 </body>
 </html>
