@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome 圖示 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Marked.js 負責將 AI 回傳的 Markdown 語法轉為漂亮網頁格式 -->
+    <!-- Marked.js 負責將 AI 回傳的 Markdown 語法轉為格式化內容 -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -16,7 +16,7 @@
             font-family: 'Noto Sans TC', sans-serif;
             background-color: #0f172a; /* 深色高質感背景 */
         }
-        /* 自訂美化滾動條 */
+        /* 美化滾動條 */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -37,7 +37,7 @@
     <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
         <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-                <div class="bg-red-600 text-white p-2.5 rounded-lg flex items-center justify-center shadow-md">
+                <div class="bg-red-600 text-white p-2.5 rounded-lg flex items-center justify-center shadow-md shadow-red-950/50">
                     <i class="fa-solid fa-microchip text-xl"></i>
                 </div>
                 <div>
@@ -68,16 +68,16 @@
 
     <main class="max-w-4xl mx-auto px-6 py-8 flex-grow w-full">
         
-        <!-- CORS 中繼站設定開關 -->
+        <!-- CORS 中繼站設定開關與說明 -->
         <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3 mb-6 flex items-center justify-between gap-4 text-xs">
             <div class="flex items-center gap-2 text-slate-400">
                 <i class="fa-solid fa-shield-halved text-amber-500"></i>
-                <span>瀏覽器跨網域相容模式 (CORS Proxy)：</span>
+                <span>瀏覽器跨網域相容模式 (CORS Proxy + 90s 長連線)：</span>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="corsProxyToggle" class="sr-only peer" checked>
                 <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
-                <span id="proxyStatusText" class="ml-2 font-medium text-emerald-400">已開啟 (突破瀏覽器阻檔)</span>
+                <span id="proxyStatusText" class="ml-2 font-medium text-emerald-400">已開啟 (備援轉發)</span>
             </label>
         </div>
 
@@ -91,6 +91,7 @@
             </button>
         </div>
 
+        <!-- 區域一：AI 智能搜尋面板 -->
         <div id="panel-smart" class="space-y-6">
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
                 <p class="text-sm text-slate-400 mb-3"><i class="fa-solid fa-info-circle mr-1"></i> 請用「台灣繁體中文」向 AI 尋找刀具規格、加工方法或詢問推薦。</p>
@@ -103,16 +104,20 @@
                     </button>
                 </div>
 
-                <!-- 快速測試標籤 -->
+                <!-- 快速測試標籤與範例資料載入 -->
                 <div class="mt-4 flex flex-wrap items-center gap-2">
-                    <span class="text-xs text-slate-500 mr-2 font-medium">點擊快速測試：</span>
+                    <span class="text-xs text-slate-500 mr-2 font-medium">快速測試：</span>
                     <button class="quick-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">Find 1 mm end mills</button>
                     <button class="quick-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">直徑 10mm 的 DrillMeister 鑽頭</button>
                     <button class="quick-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">加工不鏽鋼（SUS304）推薦刀具</button>
+                    <button id="loadMockBtn" class="bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-600/50 text-xs px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 font-medium ml-auto">
+                        <i class="fa-solid fa-flask"></i> 🧪 載入測試範例數據 (免連線)
+                    </button>
                 </div>
             </div>
         </div>
 
+        <!-- 區域二：精準型號查詢面板 -->
         <div id="panel-exact" class="space-y-6 hidden">
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
                 <p class="text-sm text-slate-400 mb-3"><i class="fa-solid fa-info-circle mr-1"></i> 輸入正確完整的 Tungaloy 刀具或配件型號，獲取核心規格細節。</p>
@@ -126,7 +131,7 @@
                 </div>
                 <!-- 快速測試型號 -->
                 <div class="mt-4 flex flex-wrap items-center gap-2">
-                    <span class="text-xs text-slate-500 mr-2 font-medium">點擊熱門型號：</span>
+                    <span class="text-xs text-slate-500 mr-2 font-medium">熱門型號：</span>
                     <button class="quick-model-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">ELD05R100U0100W03</button>
                     <button class="quick-model-tag bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-full text-slate-300 transition-colors border border-slate-700/50">EPD05R100U0100W05</button>
                 </div>
@@ -142,10 +147,11 @@
                 </div>
             </div>
 
-            <!-- 載入中動畫 -->
-            <div id="loader" class="hidden flex flex-col items-center justify-center py-12">
+            <!-- 帶即時秒數計時器之載入中動畫 -->
+            <div id="loader" class="hidden flex flex-col items-center justify-center py-12 bg-slate-900/40 border border-slate-800 rounded-2xl">
                 <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-800 border-t-red-500 mb-4"></div>
-                <p class="text-sm text-slate-400">正在連線 Tungaloy 官方雲端資料庫 (約需要幾秒鐘)...</p>
+                <p id="loaderMessage" class="text-sm font-medium text-slate-200 mb-1">正在連線 Tungaloy 官方雲端資料庫...</p>
+                <p class="text-xs text-slate-400">Tungaloy AI 正在進行深度檢索與數據排版，請稍候：<span id="timerText" class="text-amber-400 font-mono font-bold">已等待 0 秒</span></p>
             </div>
 
             <!-- 錯誤提示 -->
@@ -172,9 +178,11 @@
                 </div>
                 
                 <div class="p-6 space-y-4">
-                    <div id="smartResultCard" class="prose prose-invert max-w-none text-slate-300 leading-relaxed bg-slate-950/60 p-5 rounded-xl border border-slate-800">
+                    <!-- Markdown 內容或轉譯表單顯示卡片 -->
+                    <div id="smartResultCard" class="prose prose-invert max-w-none text-slate-300 leading-relaxed bg-slate-950/60 p-5 rounded-xl border border-slate-800 overflow-x-auto">
                     </div>
 
+                    <!-- 精準型號屬性表 -->
                     <div id="exactResultTable" class="hidden overflow-x-auto rounded-xl border border-slate-800">
                         <table class="w-full text-sm text-left text-slate-300">
                             <thead class="text-xs uppercase bg-slate-950 text-slate-400">
@@ -192,33 +200,26 @@
         </div>
     </main>
 
-    <!-- 底部資訊欄 -->
     <footer class="border-t border-slate-800 bg-slate-950/50 py-6 text-center text-xs text-slate-500">
         <p class="mb-1">Tungaloy eCatalog AI Search Web Client (zh-TW)</p>
         <p>本網頁採用 Tungaloy 官方開放 API 直接通訊，安全不經手第三方伺服器。</p>
     </footer>
 
     <script>
-        // 金鑰消毒函數 (淨化全形空格、隱形 unicode 字元)
+        // 金鑰消毒函數
         function sanitizeApiKey(rawKey) {
             if (!rawKey) return '';
             return rawKey
-                .replace(/\u3000/g, ' ')  // 替換全形空白為半形
-                .replace(/[^\x20-\x7E]/g, '') // 剔除所有非 ASCII 印出字元
+                .replace(/\u3000/g, ' ')  
+                .replace(/[^\x20-\x7E]/g, '') 
                 .trim();
         }
 
-        // 安全 LocalStorage 讀取與寫入助手
+        // 安全 LocalStorage 助手
         const safeStorage = {
-            get: (key) => {
-                try { return localStorage.getItem(key); } catch (e) { return null; }
-            },
-            set: (key, value) => {
-                try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
-            },
-            remove: (key) => {
-                try { localStorage.removeItem(key); return true; } catch (e) { return false; }
-            }
+            get: (key) => { try { return localStorage.getItem(key); } catch (e) { return null; } },
+            set: (key, value) => { try { localStorage.setItem(key, value); return true; } catch (e) { return false; } },
+            remove: (key) => { try { localStorage.removeItem(key); return true; } catch (e) { return false; } }
         };
 
         // DOM 元素取得
@@ -243,6 +244,8 @@
         const statusArea = document.getElementById('statusArea');
         const alertNoKey = document.getElementById('alertNoKey');
         const loader = document.getElementById('loader');
+        const loaderMessage = document.getElementById('loaderMessage');
+        const timerText = document.getElementById('timerText');
         const errorAlert = document.getElementById('errorAlert');
         const errorText = document.getElementById('errorText');
 
@@ -252,10 +255,33 @@
         const tableBody = document.getElementById('tableBody');
         const resultTime = document.getElementById('resultTime');
         const resultWorkflow = document.getElementById('resultWorkflow');
+        const loadMockBtn = document.getElementById('loadMockBtn');
 
         const baseApi = "https://e-catalog-search-main-ae100fb.d2.zuplo.dev";
 
-        // 核心連線助手：自動處理解析與 CORS Proxy 備用降級機制
+        // 即時計時器管理
+        let timerInterval = null;
+        let secondsElapsed = 0;
+
+        function startTimer() {
+            secondsElapsed = 0;
+            timerText.textContent = `已等待 0 秒`;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                secondsElapsed++;
+                timerText.textContent = `已等待 ${secondsElapsed} 秒`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function updateLoaderMessage(msg) {
+            loaderMessage.textContent = msg;
+        }
+
+        // 核心 API 呼叫 (90 秒長連線與多重代理備援)
         async function fetchApi(endpoint, options = {}) {
             const cleanKey = sanitizeApiKey(apiKeyInput.value);
             const fullTarget = baseApi + endpoint;
@@ -266,48 +292,60 @@
                 ...(options.headers || {})
             };
 
-            const fetchOptions = {
-                method: options.method || 'GET',
-                headers: headers,
-            };
-            if (options.body) {
-                fetchOptions.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
-            }
+            const payloadBody = options.body ? (typeof options.body === 'string' ? options.body : JSON.stringify(options.body)) : null;
 
-            // 根據代理開關決定嘗試順序 (包含正確的 corsproxy.io ?url= 格式與直接連線)
-            let urlsToTry = [];
+            // 定義備用代理管道
+            let proxyList = [];
             if (corsProxyToggle.checked) {
-                urlsToTry = [
-                    `https://corsproxy.io/?url=${encodeURIComponent(fullTarget)}`,
-                    `https://corsproxy.io/?${fullTarget}`,
-                    fullTarget
+                proxyList = [
+                    { name: "CorsProxy.io 中繼站", url: (target) => `https://corsproxy.io/?url=${encodeURIComponent(target)}` },
+                    { name: "AllOrigins 中繼站", url: (target) => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}` },
+                    { name: "CodeTabs 中繼站", url: (target) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(target)}` },
+                    { name: "原生直連模式", url: (target) => target }
                 ];
             } else {
-                urlsToTry = [
-                    fullTarget,
-                    `https://corsproxy.io/?url=${encodeURIComponent(fullTarget)}`
+                proxyList = [
+                    { name: "原生直連模式", url: (target) => target },
+                    { name: "CorsProxy.io 中繼站", url: (target) => `https://corsproxy.io/?url=${encodeURIComponent(target)}` }
                 ];
             }
 
             let lastError = null;
-            for (const url of urlsToTry) {
+
+            for (const proxy of proxyList) {
                 try {
-                    const response = await fetch(url, fetchOptions);
+                    updateLoaderMessage(`正在透過 [${proxy.name}] 連線 Tungaloy 資料庫...`);
+                    
+                    // 關鍵修正：將逾時時間延長至 90 秒 (90000 ms)
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 90000);
+
+                    const targetUrl = proxy.url(fullTarget);
+                    const response = await fetch(targetUrl, {
+                        method: options.method || 'GET',
+                        headers: headers,
+                        body: payloadBody,
+                        signal: controller.signal
+                    });
+
+                    clearTimeout(timeoutId);
+
                     if (response.ok || response.status === 401 || response.status === 403 || response.status === 404) {
                         return response;
                     }
                 } catch (e) {
                     lastError = e;
-                    console.warn(`連線嘗試失敗 (${url}):`, e);
+                    console.warn(`代理管道 [${proxy.name}] 嘗試失敗:`, e);
                 }
             }
-            throw lastError || new Error("連線失敗，請檢查網路連線或切換 CORS 模式");
+
+            throw lastError || new Error("連線逾時，請檢查網路狀態或切換代理模式");
         }
 
-        // 代理按鈕文字更新
+        // 代理開關狀態更新
         corsProxyToggle.addEventListener('change', () => {
             if (corsProxyToggle.checked) {
-                proxyStatusText.textContent = "已開啟 (突破瀏覽器阻檔)";
+                proxyStatusText.textContent = "已開啟 (備援轉發)";
                 proxyStatusText.className = "ml-2 font-medium text-emerald-400";
             } else {
                 proxyStatusText.textContent = "已停用 (原生模式)";
@@ -315,7 +353,7 @@
             }
         });
 
-        // 1. 初始化金鑰
+        // 初始化金鑰
         document.addEventListener('DOMContentLoaded', () => {
             const savedKey = safeStorage.get('tungaloy_api_key');
             if (savedKey) {
@@ -324,7 +362,7 @@
             }
         });
 
-        // 2. 密碼開關
+        // 密碼切換
         togglePassword.addEventListener('click', () => {
             if (apiKeyInput.type === 'password') {
                 apiKeyInput.type = 'text';
@@ -335,7 +373,7 @@
             }
         });
 
-        // 3. 儲存金鑰
+        // 儲存金鑰
         saveKeyBtn.addEventListener('click', () => {
             const cleanKey = sanitizeApiKey(apiKeyInput.value);
             apiKeyInput.value = cleanKey;
@@ -350,6 +388,7 @@
             }
         });
 
+        // Tab 切換
         tabSmart.addEventListener('click', () => {
             tabSmart.className = "border-b-2 border-red-500 px-6 py-3 font-medium text-slate-100 flex items-center gap-2 transition-all";
             tabExact.className = "border-b-2 border-transparent px-6 py-3 font-medium text-slate-400 hover:text-slate-200 flex items-center gap-2 transition-all";
@@ -380,7 +419,21 @@
             });
         });
 
-        // AI 智能搜尋 (使用 zh-TW)
+        // 渲染範例數據（測試表單用）
+        loadMockBtn.addEventListener('click', () => {
+            const mockText = `Found 124 milling items with cutter diameter 1 mm. Here are the first 10 matches.\n\n| Item No. | Description | Product / Series | Type | Application | DC / DCX (mm) | Flutes | LF/OAL (mm) | APMX (mm) | Grade | Link |\n|---|---|---|---|---|---:|---:|---:|---:|---|---|\n| 3106317 | EPD05R100U0100W05 | TungQuad / EPD05 | Indexable tool | Shoulder Milling | 1 / 1 | 5 | 4 / 4 | 0.157 | — | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=3106317&search=P&choose=c) |\n| 3112200 | ELD05R100U0100W03 | TungQuad / ELD05 | Indexable tool | Shoulder Milling | 1 / 1 | 3 | 3.75 / 3.75 | 0.953 | — | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=3112200&search=P&choose=c) |\n| 3323808 | TECA010H3-04C06CF-R.05 | VariableMeister Square / TECA-H3-CF-R | Solid | Shoulder Milling | 1 / — | — | 57 | 4 | KS15F | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=3323808&search=P&choose=c) |\n| 5650040 | TEB010A2-02/04/3.0C06M80 | SolidMeister Ball / TEB-A2 tapered neck | Solid | Profile Milling | 1 / — | 2 | 80 | 2 | AH750 | [E-catalog](http://catalog.tungaloy.com/Default.aspx?s=1&lang=en&GFSTYP=M&qw=5650040&search=P&choose=c) |`;
+            
+            resultTime.textContent = `查詢時間: ${new Date().toLocaleTimeString()} (測試範例數據)`;
+            resultWorkflow.textContent = `Workflow ID: MOCK-DATA-TEST`;
+            resultWorkflow.classList.remove('hidden');
+
+            smartResultCard.innerHTML = marked.parse(mockText);
+            exactResultTable.classList.add('hidden');
+            resultContainer.classList.remove('hidden');
+            errorAlert.classList.add('hidden');
+        });
+
+        // AI 智能搜尋
         async function triggerSmartSearch() {
             const cleanKey = sanitizeApiKey(apiKeyInput.value);
             apiKeyInput.value = cleanKey;
@@ -399,6 +452,7 @@
             errorAlert.classList.add('hidden');
             resultContainer.classList.add('hidden');
             loader.classList.remove('hidden');
+            startTimer();
 
             try {
                 const response = await fetchApi('/v1/catalog/smart-search', {
@@ -412,7 +466,7 @@
 
                 if (!response.ok) {
                     if (response.status === 401 || response.status === 403) {
-                        throw new Error(`金鑰驗證失敗 (HTTP ${response.status})。請檢查 API Key 是否正確或已失效。`);
+                        throw new Error(`金鑰驗證失敗 (HTTP ${response.status})。請檢查 API Key 是否正確。`);
                     }
                     throw new Error(`伺服器回應錯誤 (狀態碼: ${response.status})。`);
                 }
@@ -429,9 +483,14 @@
                 resultContainer.classList.remove('hidden');
 
             } catch (err) {
-                errorText.textContent = err.message || "連線失敗，請檢查網路或切換 CORS 模式";
+                let msg = err.message;
+                if (err.name === 'AbortError') {
+                    msg = "連線超時 (已等待超過 90 秒)。Tungaloy AI 後端目前回應較慢，建議稍後再試，或使用「🧪 載入測試範例數據」體驗。";
+                }
+                errorText.textContent = msg || "連線失敗，請檢查網路或切換代理模式";
                 errorAlert.classList.remove('hidden');
             } finally {
+                stopTimer();
                 loader.classList.add('hidden');
             }
         }
@@ -455,6 +514,7 @@
             errorAlert.classList.add('hidden');
             resultContainer.classList.add('hidden');
             loader.classList.remove('hidden');
+            startTimer();
 
             try {
                 const response = await fetchApi(`/v1/catalog/items/${encodeURIComponent(itemNumber)}`, {
@@ -502,6 +562,7 @@
                 errorText.textContent = err.message;
                 errorAlert.classList.remove('hidden');
             } finally {
+                stopTimer();
                 loader.classList.add('hidden');
             }
         }
